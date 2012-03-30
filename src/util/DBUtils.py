@@ -6,7 +6,7 @@ import util.Callable
 class DBUtils():
     def getSession():
       engine = create_engine(
-                "mysql://root:@96.126.100.154/spark", 
+                "mysql://spark:pass@96.126.100.154/spark", 
                 isolation_level="READ UNCOMMITTED"
             )
       Session = sessionmaker(bind=engine)

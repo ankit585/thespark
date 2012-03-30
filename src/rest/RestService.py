@@ -2,7 +2,7 @@ import web
 import re
 import uuid
 import sys
-sys.path.append('..')
+sys.path.append('../src')
 
 import handler.CitationHandler
 
