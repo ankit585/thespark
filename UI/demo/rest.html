@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>img{ height: 100px; float: left; }</style>
+  <script src="http://code.jquery.com/jquery-latest.js"></script>
+</head>
+<body>
+  <div id="citations">
+
+</div>
+<script>
+$.getJSON("http://96.126.100.154:8080/citation/?callback=?",
+  {
+    tags: "cat",
+    tagmode: "any",
+    format: "json"
+  },
+  function(data) {
+  var htm = "";
+  htm = '<table border="2"><tr><th>Number</th><th>Name</th><th>URL</th></tr>';
+jQuery.each(data.data, function(i,item) {
+      
+      var citation = item;
+      var citationHtml = '<tr>' +
+        '<td>' + citation.id + '</td><td>'
+          + citation.content + '</td>' +
+        '<td>' + citation.url + '' +
+          '</td>' +
+        '</tr>';
+        htm = htm + citationHtml; 
+    });
+      jQuery("#citations").append( htm+ '</table>');
+  }
+
+);
+</script>
+
+</body>
+</html>
+
