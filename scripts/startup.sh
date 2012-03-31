@@ -1,3 +1,3 @@
 #!/bin/bash
 
-nohup python ../src/rest/RestService.py 8080 &
+nohup python ../src/rest/RestService.py $1 &
