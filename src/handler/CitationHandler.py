@@ -9,12 +9,12 @@ class CitationHandler():
   def GET(self,cid):
     session = util.DBUtils.DBUtils.getSession()
     cits = None
-    if len(cid) <= 0: 
+    if len(cid) <= 0:
        cits = session.query(models.Citation.Citation).order_by(models.Citation.Citation.id).all()
     else:
        cits = session.query(models.Citation.Citation).filter_by(id=cid).all()
 
-    return util.ResponseUtils.ResponseUtils.createResponse(True,cits,True) 
+    return util.ResponseUtils.ResponseUtils.createResponse(True,cits,True)
 
 
 
@@ -33,19 +33,19 @@ class CitationHandler():
        else:
          cit = session.query(models.Citation.Citation).filter_by(id=cid).first()
          cit.content = data['content']
-         cit.url     = data['url']  
-         session.add(cit) 
+         cit.url     = data['url']
+         session.add(cit)
          response = "Record updated successfully"
        session.commit()
        status   = True
-    else:  
+    else:
        response = "Content or URL missing"
        status   = False
-    
-    return util.ResponseUtils.ResponseUtils.createResponse(status,response,False) 
+
+    return util.ResponseUtils.ResponseUtils.createResponse(status,response,False)
 
 
-  def PUT(self,cid): 
+  def PUT(self,cid):
     data = (web.data())
     data = dict([part.split('=') for part in data.split('&')])
 
@@ -59,19 +59,19 @@ class CitationHandler():
        else:
          cit = session.query(models.Citation.Citation).filter_by(id=cid).first()
          cit.content = data['content']
-         cit.url     = data['url']  
-         session.add(cit) 
+         cit.url     = data['url']
+         session.add(cit)
          session.commit()
          status   = True
          response = "Record updated successfully"
-    else:  
+    else:
        response = "Content or URL missing"
        status   = False
-    
-    return util.ResponseUtils.ResponseUtils.createResponse(status,response,False) 
+
+    return util.ResponseUtils.ResponseUtils.createResponse(status,response,False)
 
   def DELETE(self,cid):
-      
+
       session = util.DBUtils.DBUtils.getSession()
       response = ""
       if len(cid) <= 0:
@@ -79,10 +79,10 @@ class CitationHandler():
          status   = False
       else:
          cit = session.query(models.Citation.Citation).filter_by(id=cid).first()
-         session.delete(cit) 
+         session.delete(cit)
          session.commit()
          status   = True
          response = "Record deleted successfully"
-     
-      return util.ResponseUtils.ResponseUtils.createResponse(status,response,False) 
+
+      return util.ResponseUtils.ResponseUtils.createResponse(status,response,False)
 
