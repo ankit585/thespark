@@ -3,10 +3,8 @@ Packages to be installed on the server (`yum install <package-name>`)
 httpd  
 python  
 git  
-mysql_server  
 mysql  
-mysql-server  
-setuptools  
+mysql-server    
 python-devel  
 gcc  
 mysql-devel  
