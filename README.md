@@ -14,5 +14,5 @@ Apart from this install all packages in external/ by using `python setup.py inst
 To run:
 
     cd humansinc/scripts
-    ./startup.sh
+    ./startup.sh 8080
 
