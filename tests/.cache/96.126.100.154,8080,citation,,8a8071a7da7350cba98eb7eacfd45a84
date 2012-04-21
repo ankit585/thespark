@@ -1,0 +1,7 @@
+status: 200
+content-location: http://96.126.100.154:8080/citation/
+server: localhost
+date: Sat, 21 Apr 2012 16:37:33 GMT
+content-type: application/json
+
+{"status": "success", "data": [{"content": "Wikipedia", "url": "http://wikipedia.com", "id": 1}, {"content": "Apple", "url": "http://apple.com", "id": 3}, {"content": "Yahoo", "url": "http://yahoo.com", "id": 45}]}

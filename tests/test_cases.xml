@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<regressions>
+  <regression>
+    <db_host>96.126.100.154</db_host>
+    <db_user>spark</db_user>
+    <db_pass>pass</db_pass>
+    <db_name>spark</db_name>
+    <api_host>http://96.126.100.154:8080</api_host>
+    <api_host_ssl>https://96.126.100.154:443</api_host_ssl>
+    <mysql>
+      <statement>DELETE FROM citations;</statement>
+      <statement>INSERT INTO citations(id,content,url) VALUES(1,'Wikipedia','http://wikipedia.com');</statement>
+      <statement>INSERT INTO citations(id,content,url) VALUES(2,'Google','http://google.com');</statement>
+      <statement>INSERT INTO citations(id,content,url) VALUES(3,'Apple','http://apple.com');</statement>
+    </mysql>
+    <tests>
+      <test>
+        <test_id>1_citations_list</test_id>
+        <test_url>/citation/</test_url>
+        <test_method>GET</test_method>
+        <test_data> </test_data>
+        <expected_response>200</expected_response>
+        <expected_content>{"status": "success", "data": [{"content": "Wikipedia", "url": "http://wikipedia.com", "id": 1}, {"content": "Google", "url": "http://google.com", "id": 2}, {"content": "Apple", "url": "http://apple.com", "id": 3}]}</expected_content>
+      </test>
+      <test>
+        <test_id>2_citations_insert</test_id>
+        <test_url>/citation/</test_url>
+        <test_method>POST</test_method>
+        <test_data>content=Yahoo&amp;url=http://yahoo.com</test_data>
+        <expected_response>200</expected_response>
+        <expected_content>{"status": "success", "data": "Record created successfully"}</expected_content>
+      </test>
+      <test>
+        <test_id>3_citations_insert_verify</test_id>
+        <test_url>/citation/</test_url>
+        <test_method>GET</test_method>
+        <test_data> </test_data>
+        <expected_response>200</expected_response>
+        <expected_content>{"status": "success", "data": [{"content": "Wikipedia", "url": "http://wikipedia.com", "id": 1}, {"content": "Google", "url": "http://google.com", "id": 2}, {"content": "Apple", "url": "http://apple.com", "id": 3}, {"content": "Yahoo", "url": "http://yahoo.com", "id": "DO_NOT_MATCH"}]}</expected_content>
+      </test>
+      <test>
+        <test_id>4_citations_update</test_id>
+        <test_url>/citation/2</test_url>
+        <test_method>PUT</test_method>
+        <test_data>content=Facebook&amp;url=http://facebook.com</test_data>
+        <expected_response>200</expected_response>
+        <expected_content>{"status": "success", "data": "Record updated successfully"}</expected_content>
+      </test>
+      <test>
+        <test_id>5_citations_update_verify</test_id>
+        <test_url>/citation/</test_url>
+        <test_method>GET</test_method>
+        <test_data> </test_data>
+        <expected_response>200</expected_response>
+        <expected_content>{"status": "success", "data": [{"content": "Wikipedia", "url": "http://wikipedia.com", "id": 1}, {"content": "Facebook", "url": "http://facebook.com", "id": 2}, {"content": "Apple", "url": "http://apple.com", "id": 3}, {"content": "Yahoo", "url": "http://yahoo.com", "id": "DO_NOT_MATCH"}]}</expected_content>
+      </test>
+      <test>
+        <test_id>6_citations_delete</test_id>
+        <test_url>/citation/2</test_url>
+        <test_method>DELETE</test_method>
+        <test_data>content=Facebook&amp;url=http://facebook.com</test_data>
+        <expected_response>200</expected_response>
+        <expected_content>{"status": "success", "data": "Record deleted successfully"}</expected_content>
+      </test>
+      <test>
+        <test_id>6_citations_delete_verify</test_id>
+        <test_url>/citation/</test_url>
+        <test_method>GET</test_method>
+        <test_data> </test_data>
+        <expected_response>200</expected_response>
+        <expected_content>{"status": "success", "data": [{"content": "Wikipedia", "url": "http://wikipedia.com", "id": 1}, {"content": "Apple", "url": "http://apple.com", "id": 3}, {"content": "Yahoo", "url": "http://yahoo.com", "id": "DO_NOT_MATCH"}]}</expected_content>
+      </test>
+    </tests>
+  </regression>
+</regressions>
