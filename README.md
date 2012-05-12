@@ -13,10 +13,10 @@ Apart from this install all packages in external/ by using `python setup.py inst
 
 To run:
 
-    cd humansinc/scripts
+    cd thespark/scripts
     ./startup.sh 8080
 
 To run regressions:
  
-    cd humansinc/tests
+    cd thespark/tests
     ./runRegression.sh
