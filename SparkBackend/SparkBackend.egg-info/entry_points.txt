@@ -1,0 +1,5 @@
+      [paste.app_factory]
+      main = sparkbackend:main
+      [console_scripts]
+      initialize_SparkBackend_db = sparkbackend.scripts.initializedb:main
+      
