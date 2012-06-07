@@ -4,7 +4,8 @@ from  sparkbackend.util.ResponseUtils import ResponseUtils
 import pprint
 import sys
 import json
-
+from pyramid.security import Authenticated
+from pyramid.security import authenticated_userid
 
 class CitationHandler(object):
 
@@ -26,11 +27,12 @@ class CitationHandler(object):
     def citation_get(self):
         """Display a single citation 
         """
+        owner = authenticated_userid(self.request)
         cits = None
         cid = self.request.matchdict['id'] 
         cits = self.session.query(Citation).filter_by(id=cid).all()
-
-        return ResponseUtils.createResponse(True, cits, True, self.format)
+        print " Got Owner " + owner
+        return ResponseUtils.createResponse(True, cits, True,self.request, self.format)
 
     def citation_index(self):
         """Display a full list of citation if no ID specified
@@ -38,7 +40,7 @@ class CitationHandler(object):
         cits = None
         cits = self.session.query(Citation).order_by(Citation.id).all()
 
-        return ResponseUtils.createResponse(True, cits, True, self.format)
+        return ResponseUtils.createResponse(True, cits, True, self.request,self.format)
 
 
     def citation_post(self):
@@ -59,13 +61,13 @@ class CitationHandler(object):
             response = "Content or URL missing"
             status   = False
 
-        return ResponseUtils.createResponse(status, response, False, self.format)
+        return ResponseUtils.createResponse(status, response, False, self.request,self.format)
 
 
     def citation_put(self):
         """Update an existing citation
         """
-        
+         
         cid = self.request.matchdict['id'] 
         # validate
         if len(self.data['content']) > 0 and len(self.data['url']) > 0:
@@ -78,16 +80,16 @@ class CitationHandler(object):
                 cit.content = self.data['content']
                 cit.url     = self.data['url']
                 self.session.add(cit)
-                response = "Record updated successfully"
+                response = "Record updated successfully:" + owner
 
                 # commit change to DB                
                 self.session.commit()
                 status = True
         else:
-            response = "Content or URL missing"
+            response = "Content or URL missing:" + owner
             status   = False
 
-        return ResponseUtils.createResponse(status, response, False, self.format)
+        return ResponseUtils.createResponse(status, response, False,self.request, self.format)
 
 
     def citation_delete(self):
@@ -109,5 +111,5 @@ class CitationHandler(object):
             status   = True
             response = "Record deleted successfully"
 
-        return ResponseUtils.createResponse(status, response, False, self.format)
+        return ResponseUtils.createResponse(status, response, False, self.request,self.format)
 
