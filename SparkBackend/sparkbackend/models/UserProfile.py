@@ -15,19 +15,23 @@ class UserProfile(Base):
     state = Column(String(64))
     country = Column(String(32))
     dob = Column(DateTime)
+    gender = Column(String(1))
+    picUrl = Column(String(1024))
     createdOn = Column(DateTime,default=datetime.datetime.now())
 
-    def __init__(self, userKey,city,state,country,dob):
+    def __init__(self, userKey,city,state,country,dob,gender,picUrl):
         """Constructor"""
         self.userKey = userKey
         self.city = city
         self.state = state
         self.country = country
         self.dob = dob
+        self.gender = gender
+        self.picUrl = picUrl
      
 
     def __repr__(self):
-        return "<UserProfile('%d', '%s' , '%s','%s','%s')>" % (self.userKey,self.city,self.state,self.country,self.dob)
+        return "<UserProfile('%d', '%s' , '%s','%s','%s','%s','%s')>" % (self.userKey,self.city,self.state,self.country,self.dob,self.gender,self.picUrl)
 
     @property
     def serialize(self):
@@ -36,7 +40,9 @@ class UserProfile(Base):
            'userKey'     : self.userKey,
            'city'     : self.city,
            'state'     : self.state,
-           'country'     : self.dob
+           'country'     : self.dob,
+           'gender'     : self.gender,
+           'picUrl'     : self.picUrl
        }
 
 

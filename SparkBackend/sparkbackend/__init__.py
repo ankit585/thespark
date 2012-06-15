@@ -19,13 +19,16 @@ def main(global_config, **settings):
                           authentication_policy=authn_policy,
                           authorization_policy=authz_policy)
     config.add_static_view('static', 'sparkbackend:static', cache_max_age=3600)
-    config.add_route('home', '/')
-    config.add_route('citation', '/citation/{id}')
-    config.add_route('citation_index', '/citation/')
+
+    config.add_route('citation', '/api/v1/citation/{id}')
+    config.add_route('citation_index', '/api/v1/citation/')
+
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
-    config.add_route('user_index', '/user/')
-    config.add_route('user', '/user/{userID}')
+
+    # V1 User API
+    config.add_route('user_index', '/api/v1/user/')
+    config.add_route('user', '/api/v1/user/{userID}')
 
     config.add_view(CitationHandler, attr='citation_get', route_name='citation',request_method='GET',permission='view')
     config.add_view(CitationHandler, attr='citation_index', route_name='citation_index',request_method='GET')

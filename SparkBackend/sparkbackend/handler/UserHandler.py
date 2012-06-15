@@ -119,7 +119,7 @@ class UserHandler(object):
         """
         code = "0"
         try:    
-            if len(self.data['userID']) > 0 and len(self.data['password']) > 0 and len(self.data['email']) > 0:
+            if len(self.data['userID']) > 0 and len(self.data['password']) > 0 and len(self.data['email']) > 0 and len(self.data['firstName']) > 0 and len(self.data['lastName']) > 0:
 
                if self.session.query(User).filter_by(email=self.data['email']).first():
                    response = "email is already registered"
@@ -133,14 +133,14 @@ class UserHandler(object):
                    # create database object
                    salt = "" #need to get salt from secret config
                    password = hashlib.md5(salt + self.data['password']).hexdigest()
-                   user = User(self.data['userID'], password ,self.data['email'])
+                   user = User(self.data['userID'], password ,self.data['email'],self.data['firstName'],self.data['lastName'])
                    self.session.add(user)
                    self.session.flush()
                    code = SystemUtils.createRandomString()
                    email_code = EmailCode(user.id,code)
-                   self.session.add(code)                
+                   self.session.add(email_code)                
                    # send a mail to user
-                   EmailUtils.sendRegistrationMail(user.id,code)
+                   EmailUtils.sendRegistrationMail(self.data['email'],self.data['firstName'],user.id,code)
           
                    # commit change to DB
                    self.session.commit()
