@@ -12,23 +12,27 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     permissions = Column(Integer)
-    email_verified = Column(Boolean)
+    emailVerified = Column(Boolean)
     userID = Column(String(50),unique=True)
     password = Column(String(255))
     email = Column(String(255),unique=True)
+    firstName = Column(String(64))
+    lastName = Column(String(64))
     createdOn = Column(DateTime,default=datetime.datetime.now())
 
-    def __init__(self, userID, password, email):
+    def __init__(self, userID, password, email,firstName,lastName):
         """Constructor"""
         self.permissions = 0
-        self.email_verified = False
+        self.emailVerified = False
         self.userID = userID
         self.password = password
         self.email = email
+        self.firstName = firstName
+        self.lastName = lastName
      
 
     def __repr__(self):
-        return "<User('%s', '%s' , '%s', '%d', '%d','%s')>" % (self.userID,self.password,self.email,self.permissions,self.email_verified,self.createdOn)
+        return "<User('%s', '%s' , '%s','%s','%s', '%d', '%d','%s')>" % (self.userID,self.password,self.email,self.firstName,self.lastName,self.permissions,self.emailVerified,self.createdOn)
 
     @property
     def serialize(self):
@@ -37,8 +41,10 @@ class User(Base):
            'userID'     : self.userID,
            'password'     : self.password,
            'email'     : self.email,
+           'first_name'     : self.firstName,
+           'last_name'     : self.lastName,
            'permissions' : self.permissions,
-           'email_verified'     : self.email_verified,
+           'email_verified'     : self.emailVerified,
            'createdOn'     : self.createdOn
        }
 

@@ -1,13 +1,15 @@
 from  sparkbackend.models.User import User
 from  sparkbackend.util.DBUtils import DBUtils
 from  sparkbackend.util.ResponseUtils import ResponseUtils
+from  sparkbackend.util.SystemUtils import SystemUtils
+from  sparkbackend.util.EmailsUtils import EmailUtils
 import pprint
 import sys
 import json
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember
 from pyramid.security import forget
-
+import hashlib
 
 class UserHandler(object):
 
@@ -29,11 +31,12 @@ class UserHandler(object):
     def user_login(self):
         """Check if user can login
         """
-         
+        code = "0" 
         if 'form.submitted' in self.request.params:
             if len(self.data['user']) > 0 and len(self.data['password']) > 0:
                id = self.data['user']
-               password = self.data['password']
+               salt = ""
+               password = hashlib.md5(salt + self.data['password']).hexdigest()
                cit = self.session.query(User).filter_by(userID=id).first()
                if cit.password == password:
                  headers = remember(self.request,id)
@@ -45,7 +48,7 @@ class UserHandler(object):
             else: 
                status = False
                response = "Login Failed"
-            return ResponseUtils.createResponse(status, response, False,self.request, self.format,headers)
+            return ResponseUtils.createResponse(status,code, response, False,self.request, self.format,headers)
         return dict(
             message = '',
             url = self.request.application_url + '/login',
@@ -54,92 +57,201 @@ class UserHandler(object):
             password = ''
         )
     
+
     #GET      
     def user_get(self):
         """ Check if a userID exists
         """
-        cits = None
-        cid = self.request.matchdict['userID'] 
-        cits = self.session.query(User).filter_by(userID=cid).first()
-        if cits != None:
-           status = True
-           response = "User Exists"
-        else:
+        code = 0
+        user = None
+        try:
+           uid = self.request.matchdict['userID'] 
+           user = self.session.query(User).filter_by(userID=uid).first()
+           if user != None:
+              status = True
+              response = "user exists"
+           else:
+              status = False
+              code = "005"
+              response = "no such user found"
+        except KeyError:
            status = False
-           response = "User not Found" 
+           code   = "001"
+           response= "required fields missing"
+        except:  
+           status = False
+           code = "004"
+           response = "internal error - " + sys.exc_info()[0]
      
-        return ResponseUtils.createResponse(status, response, False,self.request, self.format)
+        return ResponseUtils.createResponse(status,code, response, False,self.request, self.format)
+
+    #GET      
+    def user_email_get(self):
+        """ Check if an email exists
+        """
+        code = "0"
+        user = None
+        try: 
+           uid = self.request.matchdict['email'] 
+           user = self.session.query(User).filter_by(email=uid).first()
+           if user != None:
+              status = True
+              response = "email exists"
+           else:
+              status = False
+              code = "006"
+              response = "no such email found" 
+        except KeyError:
+           status = False
+           code   = "001"
+           response= "required fields missing"
+        except:  
+           status = False
+           code = "004"
+           response = "internal error - " + sys.exc_info()[0]
+     
+        return ResponseUtils.createResponse(status,code, response, False,self.request, self.format)
+
 
     #POST
     def register(self):
         """Create a new account
         """
-            
-        # validate
-        if len(self.data['userID']) > 0 and len(self.data['password']) > 0 and len(self.data['email']) > 0:
-            # create database object
-            cit = User(self.data['userID'], self.data['password'],self.data['email'])
-            self.session.add(cit)
-            response = "Record created successfully"
-            
-            # commit change to DB
-            self.session.commit()
-            status = True
-        else:
-            response = "User ID or password or email missing"
-            status   = False
+        code = "0"
+        try:    
+            if len(self.data['userID']) > 0 and len(self.data['password']) > 0 and len(self.data['email']) > 0:
 
-        return ResponseUtils.createResponse(status, response, False,self.request, self.format)
+               if self.session.query(User).filter_by(email=self.data['email']).first():
+                   response = "email is already registered"
+                   code     = "003"
+                   status   = False
+               elif self.session.query(User).filter_by(userID=self.data['userID']).first():
+                   response = "userID is already registered"
+                   code     = "002"
+                   status   = False
+               else:
+                   # create database object
+                   salt = "" #need to get salt from secret config
+                   password = hashlib.md5(salt + self.data['password']).hexdigest()
+                   user = User(self.data['userID'], password ,self.data['email'])
+                   self.session.add(user)
+                   self.session.flush()
+                   code = SystemUtils.createRandomString()
+                   email_code = EmailCode(user.id,code)
+                   self.session.add(code)                
+                   # send a mail to user
+                   EmailUtils.sendRegistrationMail(user.id,code)
+          
+                   # commit change to DB
+                   self.session.commit()
+
+                   status = True
+                   response = "user registered successfully"
+            else:
+               response = "required fields missing"
+               code     = "001"
+               status   = False
+        except KeyError:
+           status = False
+           code   = "001"
+           response= "required fields missing"
+        except:  
+           status = False
+           code = "004"
+           response = "internal error - " + sys.exc_info()[0]
+
+        return ResponseUtils.createResponse(status,code, response, False,self.request, self.format)
 
     #PUT 
     def reset_password(self):
         """Update an existing password
         """
+        code = "0"
+        try: 
+           cid = self.request.matchdict['userID'] 
+           cit = self.session.query(User).filter_by(userID=cid).first()
+           if len(self.data['old_password']) > 0 and len(self.data['new_password']) > 0:
+               if len(cid) <= 0:
+                  response = "required fields missing"
+                  status   = False
+                  code = "001"
+               elif cit == None:
+                  response = "no such user found"
+                  code = "005"
+                  status   = False
+               else:
+                   # create database object
+                  salt = ""
+                  old_password = hashlib.md5(salt + self.data['old_password']).hexdigest()
+                  if cit.password == old_password:
+                      cit.password = self.data['new_password']
+                      cit.password = hashlib.md5(salt + self.data['new_password']).hexdigest()
+                      self.session.add(cit)
+                      response = "password reset successful"
+                      # commit change to DB                
+                      self.session.commit()
+                      status = True
+                  else:
+                      status = False
+                      response = "existing password is incorrect"   
+           else:
+               response = "required fields missing"
+               code = "001"
+               status   = False
+        except KeyError:
+           status = False
+           code   = "001"
+           response= "required fields missing"
+        except:  
+           status = False
+           code = "004"
+           response = "internal error - " + sys.exc_info()[0]
         
-        cid = self.request.matchdict['userID'] 
-        # validate
-        if len(self.data['old_password']) > 0 and len(self.data['new_password']) > 0:
-            if len(cid) <= 0:
-                response = "Missing parameter (userID to be updated)"
-                status   = False
-            else:
-                # create database object
-                cit = self.session.query(User).filter_by(userID=cid).first()
-                if cit.password == old_password:
-                   cit.password = self.data['new_password']
-                   self.session.add(cit)
-                   response = "Record updated successfully"
-                   # commit change to DB                
-                   self.session.commit()
-                   status = True
-                else:
-                   status = False
-                   response = "Old password didn't match"   
-        else:
-            response = "Old password or new password missing"
-            status   = False
-
-        return ResponseUtils.createResponse(status, response, False,self.request, self.format)
+        return ResponseUtils.createResponse(status,code , response, False,self.request, self.format)
 
     #DELETE 
     def user_delete(self):
         """Delete an existing user account
         """
+        code = "0"
+        try: 
+           cid = self.request.matchdict['userID'] 
+           cit = self.session.query(User).filter_by(userID=cid).first()
+           if len(self.data['password']) > 0:
+               if len(cid) <= 0:
+                  response = "required fields missing"
+                  code = "001"
+                  status   = False
+               elif cit == None:
+                  response = "no such user found"
+                  code = "005"
+                  status   = False
+               else:
+                   # create database object
+                  salt = ""
+                  password = hashlib.md5(salt + self.data['password']).hexdigest()
+                  if cit.password == password:
+                      self.session.delete(cit)
+                      response = "user deleted"
+                      # commit change to DB                
+                      self.session.commit()
+                      status = True
+                  else:
+                      status = False
+                      response = "existing password is incorrect"   
+           else:
+               response = "required fields missing"
+               code = "001"
+               status   = False
+        except KeyError:
+           status = False
+           code   = "001"
+           response= "required fields missing"
+        except:  
+           status = False
+           code = "004"
+           response = "internal error - " + sys.exc_info()[0]
         
-        cid = self.request.matchdict['userID'] 
-        # validate
-        if len(cid) <= 0:
-            response = "Missing parameter (userID to be deleted)"
-            status   = False
-        else:
-            # create database object
-            cit = self.session.query(User).filter_by(userID=cid).first()
-            self.session.delete(cit)
-            
-            # commit changes to DB
-            self.session.commit()
-            status   = True
-            response = "Record deleted successfully"
 
-        return ResponseUtils.createResponse(status, response, False, self.request,self.format)
+        return ResponseUtils.createResponse(status,code, response, False, self.request,self.format)
 
