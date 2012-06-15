@@ -7,7 +7,7 @@ from sparkbackend.util.Callable import Callable
 
 class ResponseUtils():
 
-    def createResponse(status, result, serialize,request ,format="json",header=None):
+    def createResponse(status,code, result, serialize,request ,format="json",header=None):
         """ Create and format a response
             Available formats: JSON ('json'), XML ('xml')
         """
@@ -37,9 +37,9 @@ class ResponseUtils():
            res.headerlist = header
 
         if format == "xml":
-            response = XMLDict.convert_dict_to_xml({'response': {'status':status, 'data':output}})
+            response = XMLDict.convert_dict_to_xml({'response': {'status':status,'code':code, 'data':output}})
         else: # default - format = "json":
-            response = json.dumps({'status':status, 'data':output})
+            response = json.dumps({'status':status,'code':code, 'data':output})
 
         callback = request.params.get('callback',None) 
         if callback:

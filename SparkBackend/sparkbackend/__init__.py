@@ -29,20 +29,22 @@ def main(global_config, **settings):
     # V1 User API
     config.add_route('user_index', '/api/v1/user/')
     config.add_route('user', '/api/v1/user/{userID}')
+    config.add_route('user_email', '/api/v1/user/email/{email}')
 
     config.add_view(CitationHandler, attr='citation_get', route_name='citation',request_method='GET',permission='view')
-    config.add_view(CitationHandler, attr='citation_index', route_name='citation_index',request_method='GET')
-    config.add_view(CitationHandler, attr='citation_post', route_name='citation_index',request_method='POST')
-    config.add_view(CitationHandler, attr='citation_put', route_name='citation',request_method='PUT')
-    config.add_view(CitationHandler, attr='citation_delete', route_name='citation',request_method='DELETE')
+    config.add_view(CitationHandler, attr='citation_index', route_name='citation_index',request_method='GET',permission='view')
+    config.add_view(CitationHandler, attr='citation_post', route_name='citation_index',request_method='POST',permission='view')
+    config.add_view(CitationHandler, attr='citation_put', route_name='citation',request_method='PUT',permission='view')
+    config.add_view(CitationHandler, attr='citation_delete', route_name='citation',request_method='DELETE',permission='view')
 
 
-    config.add_view(UserHandler,attr='user_login', route_name='login',renderer='sparkbackend:templates/login.pt')
-    config.add_view(UserHandler,attr='user_logout', route_name='logout',request_method='GET')
-    config.add_view(UserHandler,attr='user_get', route_name='user',request_method='GET')
-    config.add_view(UserHandler,attr='register', route_name='user_index',request_method='POST')
-    config.add_view(UserHandler,attr='reset_password', route_name='user',request_method='PUT')
-    config.add_view(UserHandler,attr='user_delete', route_name='user',request_method='DELETE')
+    config.add_view(UserHandler,attr='user_login', route_name='login',renderer='sparkbackend:templates/login.pt',permission='view')
+    config.add_view(UserHandler,attr='user_logout', route_name='logout',request_method='GET',permission='view')
+    config.add_view(UserHandler,attr='user_get', route_name='user',request_method='GET',permission='view')
+    config.add_view(UserHandler,attr='user_email_get', route_name='user_email',request_method='GET',permission='view')
+    config.add_view(UserHandler,attr='register', route_name='user_index',request_method='POST',permission='view')
+    config.add_view(UserHandler,attr='reset_password', route_name='user',request_method='PUT',permission='view')
+    config.add_view(UserHandler,attr='user_delete', route_name='user',request_method='DELETE',permission='view')
    # config.add_view('sparkbackend.login.login',context='pyramid.httpexceptions.HTTPForbidden',renderer='sparkbackend:templates/login.pt')
 
 

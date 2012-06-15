@@ -1,8 +1,9 @@
 from  sparkbackend.models.User import User
+from  sparkbackend.models.EmailCode import EmailCode
 from  sparkbackend.util.DBUtils import DBUtils
 from  sparkbackend.util.ResponseUtils import ResponseUtils
 from  sparkbackend.util.SystemUtils import SystemUtils
-from  sparkbackend.util.EmailsUtils import EmailUtils
+from  sparkbackend.util.EmailUtils import EmailUtils
 import pprint
 import sys
 import json
@@ -10,6 +11,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember
 from pyramid.security import forget
 import hashlib
+import traceback
 
 class UserHandler(object):
 
@@ -37,8 +39,8 @@ class UserHandler(object):
                id = self.data['user']
                salt = ""
                password = hashlib.md5(salt + self.data['password']).hexdigest()
-               cit = self.session.query(User).filter_by(userID=id).first()
-               if cit.password == password:
+               user = self.session.query(User).filter_by(userID=id).first()
+               if user.password == password:
                  headers = remember(self.request,id)
                  return HTTPFound(location = "/",
                              headers = headers)
@@ -81,7 +83,10 @@ class UserHandler(object):
         except:  
            status = False
            code = "004"
-           response = "internal error - " + sys.exc_info()[0]
+           response = "internal error"
+           exc_type, exc_value, exc_traceback = sys.exc_info()
+           lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+           print ''.join('*** ' + line for line in lines) 
      
         return ResponseUtils.createResponse(status,code, response, False,self.request, self.format)
 
@@ -108,7 +113,10 @@ class UserHandler(object):
         except:  
            status = False
            code = "004"
-           response = "internal error - " + sys.exc_info()[0]
+           response = "internal error"
+           exc_type, exc_value, exc_traceback = sys.exc_info()
+           lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+           print ''.join('*** ' + line for line in lines) 
      
         return ResponseUtils.createResponse(status,code, response, False,self.request, self.format)
 
@@ -136,11 +144,11 @@ class UserHandler(object):
                    user = User(self.data['userID'], password ,self.data['email'],self.data['firstName'],self.data['lastName'])
                    self.session.add(user)
                    self.session.flush()
-                   code = SystemUtils.createRandomString()
-                   email_code = EmailCode(user.id,code)
+                   secret = SystemUtils.createRandomString()
+                   email_code = EmailCode(user.id,secret)
                    self.session.add(email_code)                
                    # send a mail to user
-                   EmailUtils.sendRegistrationMail(self.data['email'],self.data['firstName'],user.id,code)
+                   EmailUtils.sendRegistrationMail(self.data['email'],self.data['firstName'],user.id,secret)
           
                    # commit change to DB
                    self.session.commit()
@@ -158,7 +166,10 @@ class UserHandler(object):
         except:  
            status = False
            code = "004"
-           response = "internal error - " + sys.exc_info()[0]
+           response = "internal error"
+           exc_type, exc_value, exc_traceback = sys.exc_info()
+           lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+           print ''.join('*** ' + line for line in lines) 
 
         return ResponseUtils.createResponse(status,code, response, False,self.request, self.format)
 
@@ -168,14 +179,14 @@ class UserHandler(object):
         """
         code = "0"
         try: 
-           cid = self.request.matchdict['userID'] 
-           cit = self.session.query(User).filter_by(userID=cid).first()
+           uid = self.request.matchdict['userID'] 
+           user = self.session.query(User).filter_by(userID=uid).first()
            if len(self.data['old_password']) > 0 and len(self.data['new_password']) > 0:
-               if len(cid) <= 0:
+               if len(uid) <= 0:
                   response = "required fields missing"
                   status   = False
                   code = "001"
-               elif cit == None:
+               elif user == None:
                   response = "no such user found"
                   code = "005"
                   status   = False
@@ -183,10 +194,10 @@ class UserHandler(object):
                    # create database object
                   salt = ""
                   old_password = hashlib.md5(salt + self.data['old_password']).hexdigest()
-                  if cit.password == old_password:
-                      cit.password = self.data['new_password']
-                      cit.password = hashlib.md5(salt + self.data['new_password']).hexdigest()
-                      self.session.add(cit)
+                  if user.password == old_password:
+                      user.password = self.data['new_password']
+                      user.password = hashlib.md5(salt + self.data['new_password']).hexdigest()
+                      self.session.add(user)
                       response = "password reset successful"
                       # commit change to DB                
                       self.session.commit()
@@ -205,7 +216,10 @@ class UserHandler(object):
         except:  
            status = False
            code = "004"
-           response = "internal error - " + sys.exc_info()[0]
+           response = "internal error"
+           exc_type, exc_value, exc_traceback = sys.exc_info()
+           lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+           print ''.join('*** ' + line for line in lines) 
         
         return ResponseUtils.createResponse(status,code , response, False,self.request, self.format)
 
@@ -215,14 +229,14 @@ class UserHandler(object):
         """
         code = "0"
         try: 
-           cid = self.request.matchdict['userID'] 
-           cit = self.session.query(User).filter_by(userID=cid).first()
+           uid = self.request.matchdict['userID'] 
+           user = self.session.query(User).filter_by(userID=uid).first()
            if len(self.data['password']) > 0:
-               if len(cid) <= 0:
+               if len(uid) <= 0:
                   response = "required fields missing"
                   code = "001"
                   status   = False
-               elif cit == None:
+               elif user == None:
                   response = "no such user found"
                   code = "005"
                   status   = False
@@ -230,8 +244,8 @@ class UserHandler(object):
                    # create database object
                   salt = ""
                   password = hashlib.md5(salt + self.data['password']).hexdigest()
-                  if cit.password == password:
-                      self.session.delete(cit)
+                  if user.password == password:
+                      self.session.delete(user)
                       response = "user deleted"
                       # commit change to DB                
                       self.session.commit()
@@ -250,7 +264,10 @@ class UserHandler(object):
         except:  
            status = False
            code = "004"
-           response = "internal error - " + sys.exc_info()[0]
+           response = "internal error"
+           exc_type, exc_value, exc_traceback = sys.exc_info()
+           lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+           print ''.join('*** ' + line for line in lines) 
         
 
         return ResponseUtils.createResponse(status,code, response, False, self.request,self.format)

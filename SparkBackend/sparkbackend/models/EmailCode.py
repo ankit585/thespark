@@ -11,7 +11,6 @@ class EmailCode(Base):
     __tablename__ = "email_code"
 
     userKey = Column(Integer, primary_key=True)
-    userKey = Column(Integer,unique=True)
     code = Column(String(255),unique=True)
 
     def __init__(self, userKey, code):

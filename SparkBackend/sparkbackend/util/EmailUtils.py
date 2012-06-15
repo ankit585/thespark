@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
-class EmailsUtils():
+class EmailUtils():
 
     def sendRegistrationMail(email,firstName,userKey,code):
         """ send registration mail
@@ -19,7 +19,7 @@ class EmailsUtils():
         msg['From'] = me
         msg['To'] = email
         #FIXME Need to make the host configurable
-        url = "http://96.126.100.154/api/v1/user/confirmation?id=" + userKey + "&code=" + code
+        url = "http://96.126.100.154/api/v1/user/confirmation?id=" + str(userKey) + "&code=" + code
         # Create the body of the message (a plain-text and an HTML version).
         text = "Hi "+firstName +"\nWelcome to The Spark.Please confirm your registration by clicking the following link. \n" + url
         html = "<html><head></head><body><p>Hi "+firstName+"<br>Welcome to The Spark.Please confirm your registration by clicking the following link.<br>"+url+"</p></body></html>"
@@ -38,7 +38,8 @@ class EmailsUtils():
         s = smtplib.SMTP('localhost')
         # sendmail function takes 3 arguments: sender's address, recipient's address
         # and message to send - here it is sent as one string.
-        s.sendmail(me, you, msg.as_string())
+        s.sendmail(me, email, msg.as_string())
         s.quit()
-        sendRegistrationMail = Callable(sendRegistrationMail)
+        
+    sendRegistrationMail = Callable(sendRegistrationMail)
 
