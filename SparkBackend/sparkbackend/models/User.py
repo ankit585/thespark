@@ -74,7 +74,7 @@ class User(Base):
             }
 
 
-engine = create_engine('mysql://spark:pass@96.126.100.154/spark',
+engine = create_engine('mysql://spark:passpass@sparkdb1.ckqwp2khkc3l.us-east-1.rds.amazonaws.com/sparkdb',
                        isolation_level='READ UNCOMMITTED')
 
 # get a handle on the table object
